@@ -1,0 +1,33 @@
+name: CodSpeed
+'on':
+  push:
+    branches:
+    - main
+  pull_request: null
+  workflow_dispatch: null
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  benchmarks:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Ninja
+      run: sudo apt-get install ninja-build
+    - name: Configure CMake with CodSpeed
+      run: "cmake -B build \\\n  -G Ninja \\\n  -DCMAKE_BUILD_TYPE=RelWithDebInfo\
+        \ \\\n  -DADA_BENCHMARKS=ON \\\n  -DCODSPEED_MODE=simulation\n"
+      env:
+        CXX: g++-12
+    - name: Build benchmarks
+      run: cmake --build build -j=4
+    - name: Run benchmarks with CodSpeed
+      uses: CodSpeedHQ/action@v4
+      with:
+        upload-url: ${{ secrets.CODSPEED_STAGING_UPLOAD_URL }}
+        mode: simulation
+        run: cd build && benchmarks/bench
