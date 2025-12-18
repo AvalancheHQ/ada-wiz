@@ -41,16 +41,16 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   if(ADA_TESTING OR ADA_BENCHMARKS)
     CPMAddPackage("gh:simdjson/simdjson@3.10.1")
   endif()
-  # We use Google Benchmark, but it does not build under several 32-bit systems.
+  # We use Google Benchmark (CodSpeed fork for performance testing), but it does not build under several 32-bit systems.
   if(ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
     CPMAddPackage(
       NAME benchmark
-      GITHUB_REPOSITORY google/benchmark
-      VERSION 1.9.0
+      GITHUB_REPOSITORY CodSpeedHQ/codspeed-cpp
+      SOURCE_SUBDIR google_benchmark
+      GIT_TAG main
       OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
               "BENCHMARK_ENABLE_INSTALL OFF"
               "BENCHMARK_ENABLE_WERROR OFF"
-
     )
   endif()
 
