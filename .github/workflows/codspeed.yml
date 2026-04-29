@@ -1,0 +1,39 @@
+name: CodSpeed
+'on':
+  push:
+    branches:
+    - main
+  pull_request: null
+  workflow_dispatch: null
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  codspeed:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+    - name: Setup Ninja
+      run: sudo apt-get install -y ninja-build
+    - name: Build benchmarks
+      run: "cmake -B build -G Ninja \\\n  -DADA_BENCHMARKS=ON \\\n  -DCMAKE_BUILD_TYPE=RelWithDebInfo\
+        \ \\\n  -DCODSPEED_MODE=simulation\ncmake --build build --target bench bench_search_params\
+        \ bbc_bench percent_encode -j$(nproc)\n"
+    - name: Run benchmarks
+      uses: CodSpeedHQ/action@c381be0bfd20e844fb45594f6aa182ffcd94545c
+      with:
+        upload-url: ${{ secrets.CODSPEED_FRANCOIS_DEV_UPLOAD_URL }}
+        mode: simulation
+        run: './build/benchmarks/bench
+
+          ./build/benchmarks/bench_search_params
+
+          ./build/benchmarks/bbc_bench
+
+          ./build/benchmarks/percent_encode
+
+          '
